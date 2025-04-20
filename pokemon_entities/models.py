@@ -1,4 +1,5 @@
 from django.db import models  # noqa F401
+from django.utils import timezone
 
 
 class Pokemon(models.Model):
@@ -15,11 +16,11 @@ class PokemonEntity(models.Model):
 
     pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE)
 
-    appeared_at = models.DateTimeField('Время появления')
-    disappeared_at = models.DateTimeField('Время исчезновения')
+    appeared_at = models.DateTimeField(default=timezone.now)
+    disappeared_at = models.DateTimeField(default=timezone.now)
 
-    Level = models.IntegerField(blank=True)
-    Health = models.IntegerField(blank=True)
-    Attack = models.IntegerField(blank=True)
-    Protection = models.IntegerField(blank=True)
-    Endurance = models.IntegerField(blank=True)
+    level = models.IntegerField(blank=True)   
+    health = models.IntegerField(blank=True)  
+    attack = models.IntegerField(blank=True)  
+    protection = models.IntegerField(blank=True) 
+    stamina = models.IntegerField(blank=True) 
