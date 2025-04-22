@@ -14,13 +14,13 @@ class PokemonEntity(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
 
-    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE)
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE) # Corrected!
 
     appeared_at = models.DateTimeField(default=timezone.now)
     disappeared_at = models.DateTimeField(default=timezone.now)
 
-    level = models.IntegerField(blank=True)   
-    health = models.IntegerField(blank=True)  
-    attack = models.IntegerField(blank=True)  
-    protection = models.IntegerField(blank=True) 
-    stamina = models.IntegerField(blank=True) 
+    level = models.IntegerField(blank=True, null=True)   
+    health = models.IntegerField(blank=True, null=True)  
+    attack = models.IntegerField(blank=True, null=True)  
+    protection = models.IntegerField(blank=True, null=True) 
+    stamina = models.IntegerField(blank=True, null=True)
