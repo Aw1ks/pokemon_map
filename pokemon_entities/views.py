@@ -68,7 +68,7 @@ def show_all_pokemons(request):
                     "title_ru": pokemon_entity.pokemon.title,
                     "title_en": pokemon_entity.pokemon.title,
                     "title_jp": pokemon_entity.pokemon.title,
-                    "description": '',
+                    "description": pokemon_entity.pokemon.description,
                     "img_url": image_url,
                     "entities": [
                         {
