@@ -1,11 +1,13 @@
 import folium
 import json
 
+
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
 from .models import Pokemon, PokemonEntity
 from django.http import HttpResponse
 from django.utils import timezone
+
 
 
 MOSCOW_CENTER = [55.751244, 37.618423]
@@ -14,6 +16,7 @@ DEFAULT_IMAGE_URL = (
     '/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832'
     '&fill=transparent'
 )
+pokemon_info_global = None
 
 
 def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
@@ -34,9 +37,15 @@ def get_image_url(request, image):
 
 
 def show_all_pokemons(request):
+    global pokemon_info_global
     pokemons_on_page = []
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     
+    pokemon_info_global = {
+        'pokemon': [
+        ]
+    }
+
     now = timezone.localtime()
     pokemon_entities = PokemonEntity.objects.filter(
         disappeared_at__gte=now,
@@ -51,6 +60,23 @@ def show_all_pokemons(request):
             pokemon_entity.latitude,
             pokemon_entity.longitude,
             image_url
+        )
+
+        pokemon_info_global['pokemon'].append(
+                {
+                    "pokemon_id": pokemon_entity.pokemon.id,
+                    "title_ru": pokemon_entity.pokemon.title,
+                    "title_en": pokemon_entity.pokemon.title,
+                    "title_jp": pokemon_entity.pokemon.title,
+                    "description": '',
+                    "img_url": image_url,
+                    "entities": [
+                        {
+                            "lat": pokemon_entity.latitude,
+                            "lon": pokemon_entity.longitude
+                        }
+                    ]
+                }
         )
 
     for pokemon in Pokemon.objects.all():
@@ -69,8 +95,7 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    with open('pokemon_entities/pokemons.json', encoding='utf-8') as database:
-        pokemons = json.load(database)['pokemons']
+    pokemons = pokemon_info_global['pokemon']
 
     for pokemon in pokemons:
         if pokemon['pokemon_id'] == int(pokemon_id):
