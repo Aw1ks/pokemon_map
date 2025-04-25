@@ -16,7 +16,6 @@ DEFAULT_IMAGE_URL = (
     '/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832'
     '&fill=transparent'
 )
-pokemon_info_global = None
 
 
 def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
@@ -37,14 +36,8 @@ def get_image_url(request, image):
 
 
 def show_all_pokemons(request):
-    global pokemon_info_global
     pokemons_on_page = []
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    
-    pokemon_info_global = {
-        'pokemon': [
-        ]
-    }
 
     now = timezone.localtime()
     pokemon_entities = PokemonEntity.objects.filter(
@@ -62,22 +55,6 @@ def show_all_pokemons(request):
             image_url
         )
 
-        pokemon_info_global['pokemon'].append(
-                {
-                    "pokemon_id": pokemon_entity.pokemon.id,
-                    "title_ru": pokemon_entity.pokemon.title,
-                    "title_en": pokemon_entity.pokemon.title,
-                    "title_jp": pokemon_entity.pokemon.title,
-                    "description": pokemon_entity.pokemon.description,
-                    "img_url": image_url,
-                    "entities": [
-                        {
-                            "lat": pokemon_entity.latitude,
-                            "lon": pokemon_entity.longitude
-                        }
-                    ]
-                }
-        )
 
     for pokemon in Pokemon.objects.all():
         image_url = get_image_url(request, pokemon.image)
@@ -95,9 +72,54 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemons = pokemon_info_global['pokemon']
+    pokemon_info = {
+        'pokemons': [
+        ]
+    }
 
-    for pokemon in pokemons:
+    now = timezone.localtime()
+    pokemon_entities = PokemonEntity.objects.filter(
+        disappeared_at__gte=now,
+        appeared_at__lt=now
+    )
+
+    for pokemon_entity in pokemon_entities:
+        pokemon_image_url = get_image_url(request, pokemon_entity.pokemon.image)
+
+        if pokemon_entity.pokemon.previous_evolution:
+            previous_evolution_title = pokemon_entity.pokemon.previous_evolution.title
+            previous_evolution_id = pokemon_entity.pokemon.previous_evolution.id
+            previous_evolution_img_url = get_image_url(request, pokemon_entity.pokemon.previous_evolution.image)
+        else:
+            previous_evolution_title = None
+            previous_evolution_id = None
+            previous_evolution_img_url = None
+
+        pokemon_info['pokemons'].append({
+                "pokemon_id": pokemon_entity.pokemon.id,
+                "title_ru": pokemon_entity.pokemon.title,
+                "title_en": pokemon_entity.pokemon.title_en,
+                "title_jp": pokemon_entity.pokemon.title_jp,
+                "description": pokemon_entity.pokemon.description,
+                "img_url": pokemon_image_url,
+                "entities": [
+                    {
+                        "lat": pokemon_entity.latitude,
+                        "lon": pokemon_entity.longitude
+                    }
+                ],
+                "previous_evolution": {
+                    "title_ru": previous_evolution_title,
+                    "pokemon_id": previous_evolution_id,
+                    "img_url": previous_evolution_img_url
+                }
+            })
+
+        if previous_evolution_title == None:
+            for pokemon in pokemon_info['pokemons']:
+                del pokemon['previous_evolution']
+
+    for pokemon in pokemon_info['pokemons']:
         if pokemon['pokemon_id'] == int(pokemon_id):
             requested_pokemon = pokemon
             break
