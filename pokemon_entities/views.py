@@ -81,18 +81,28 @@ def show_pokemon(request, pokemon_id):
     )
 
     for pokemon_entity in pokemon_entities:
+        previous_pokemon_evolution = None
+        next_pokemon_evolution = None
+
+        previous_evolution = Pokemon.objects.filter(previous_evolutions__pokemonentity=pokemon_entity).first()
+        next_evolution = Pokemon.objects.filter(previous_evolution=pokemon_entity.pokemon).first()
+
         pokemon_image_url = get_image_url(request, pokemon_entity.pokemon.image)
-        pokemon_previous_evolution = None
 
-        if pokemon_entity.pokemon.previous_evolution:
-            previous_evolution_title = pokemon_entity.pokemon.previous_evolution.title
-            previous_evolution_id = pokemon_entity.pokemon.previous_evolution.id
-            previous_evolution_img_url = get_image_url(request, pokemon_entity.pokemon.previous_evolution.image)
+        if previous_evolution:
+            previous_evolution_image = get_image_url(request, previous_evolution.image)
+            previous_pokemon_evolution = {
+                    "title_ru": previous_evolution.title,
+                    "pokemon_id": previous_evolution.id,
+                    "img_url": previous_evolution_image
+                }
 
-            pokemon_previous_evolution = {
-                    "title_ru": previous_evolution_title,
-                    "pokemon_id": previous_evolution_id,
-                    "img_url": previous_evolution_img_url
+        if next_evolution:
+            next_evolution_image = get_image_url(request, next_evolution.image)
+            next_pokemon_evolution = {
+                    "title_ru": next_evolution.title,
+                    "pokemon_id": next_evolution.id,
+                    "img_url": next_evolution_image
                 }
 
         pokemon_info['pokemons'].append({
@@ -108,7 +118,8 @@ def show_pokemon(request, pokemon_id):
                         "lon": pokemon_entity.longitude
                     }
                 ],
-                "previous_evolution": pokemon_previous_evolution
+                "previous_evolution": previous_pokemon_evolution, 
+                "next_evolution": next_pokemon_evolution
             })
 
     for pokemon in pokemon_info['pokemons']:
