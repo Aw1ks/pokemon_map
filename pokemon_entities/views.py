@@ -72,10 +72,7 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemon_info = {
-        'pokemons': [
-        ]
-    }
+    pokemon_info = {'pokemons': []}
 
     now = timezone.localtime()
     pokemon_entities = PokemonEntity.objects.filter(
@@ -85,15 +82,18 @@ def show_pokemon(request, pokemon_id):
 
     for pokemon_entity in pokemon_entities:
         pokemon_image_url = get_image_url(request, pokemon_entity.pokemon.image)
+        pokemon_previous_evolution = None
 
         if pokemon_entity.pokemon.previous_evolution:
             previous_evolution_title = pokemon_entity.pokemon.previous_evolution.title
             previous_evolution_id = pokemon_entity.pokemon.previous_evolution.id
             previous_evolution_img_url = get_image_url(request, pokemon_entity.pokemon.previous_evolution.image)
-        else:
-            previous_evolution_title = None
-            previous_evolution_id = None
-            previous_evolution_img_url = None
+
+            pokemon_previous_evolution = {
+                    "title_ru": previous_evolution_title,
+                    "pokemon_id": previous_evolution_id,
+                    "img_url": previous_evolution_img_url
+                }
 
         pokemon_info['pokemons'].append({
                 "pokemon_id": pokemon_entity.pokemon.id,
@@ -108,16 +108,8 @@ def show_pokemon(request, pokemon_id):
                         "lon": pokemon_entity.longitude
                     }
                 ],
-                "previous_evolution": {
-                    "title_ru": previous_evolution_title,
-                    "pokemon_id": previous_evolution_id,
-                    "img_url": previous_evolution_img_url
-                }
+                "previous_evolution": pokemon_previous_evolution
             })
-
-        if previous_evolution_title == None:
-            for pokemon in pokemon_info['pokemons']:
-                del pokemon['previous_evolution']
 
     for pokemon in pokemon_info['pokemons']:
         if pokemon['pokemon_id'] == int(pokemon_id):
