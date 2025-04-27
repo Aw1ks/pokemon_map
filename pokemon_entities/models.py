@@ -5,20 +5,22 @@ from django.utils import timezone
 class Pokemon(models.Model):
     """Информация о покемоне."""
 
-    title = models.CharField('Название (рус.)', max_length=200)
-    title_en = models.CharField('Название (англ.)', max_length=200)
-    title_jp = models.CharField('Название (яп.)', max_length=200)
-    image = models.ImageField('Изображение')
-    description = models.TextField('Описание', default='Описание в разработке')
+    title = models.CharField('Название (рус.)', max_length=200, default='Название в разработке', blank=True)
+    title_en = models.CharField('Название (англ.)', max_length=200, default='Название в разработке', blank=True)
+    title_jp = models.CharField('Название (яп.)', max_length=200, default='Название в разработке', blank=True)
+    image = models.ImageField(
+        'Изображение',
+        upload_to='static\images')
+    description = models.TextField('Описание', default='Описание в разработке', blank=True)
 
     previous_evolution = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='previous_evolutions',
+        related_name='next_evolutions',
         verbose_name='Предыдущая эволюция'
-    )    
+    )
 
     def __str__(self):
         return f'{self.title}'
@@ -28,10 +30,15 @@ class PokemonEntity(models.Model):
 
     latitude = models.FloatField('Широта')
     longitude = models.FloatField('Долгота')
-    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE, verbose_name='Покемон')
+    pokemon = models.ForeignKey(
+        Pokemon,
+        on_delete=models.CASCADE, 
+        verbose_name='Покемон',
+        related_name='Покемон'
+    )
 
-    appeared_at = models.DateTimeField('Время появления', default=timezone.now)
-    disappeared_at = models.DateTimeField('Время появления', default=timezone.now)
+    appeared_at = models.DateTimeField('Время появления', default=timezone.now, null=True)
+    disappeared_at = models.DateTimeField('Время появления', default=timezone.now, null=True)
 
     level = models.IntegerField('Уровень', blank=True, null=True)   
     health = models.IntegerField('Здоровье', blank=True, null=True)  
