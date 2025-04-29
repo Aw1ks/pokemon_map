@@ -10,7 +10,9 @@ class Pokemon(models.Model):
     title_jp = models.CharField('Название (яп.)', max_length=200, default='Название в разработке', blank=True)
     image = models.ImageField(
         'Изображение',
-        upload_to='static\images')
+        upload_to='static\images',
+        blank=True
+    )
     description = models.TextField('Описание', default='Описание в разработке', blank=True)
 
     previous_evolution = models.ForeignKey(
@@ -34,7 +36,7 @@ class PokemonEntity(models.Model):
         Pokemon,
         on_delete=models.CASCADE, 
         verbose_name='Покемон',
-        related_name='Покемон'
+        related_name='pokemon'
     )
 
     appeared_at = models.DateTimeField('Время появления', default=timezone.now, null=True)
