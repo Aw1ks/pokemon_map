@@ -35,8 +35,8 @@ class PokemonEntity(models.Model):
     pokemon = models.ForeignKey(
         Pokemon,
         on_delete=models.CASCADE, 
-        verbose_name='Покемон',
-        related_name='pokemon'
+        verbose_name='Тип покемона',
+        related_name='entities'
     )
 
     appeared_at = models.DateTimeField('Время появления', default=timezone.now, null=True)
